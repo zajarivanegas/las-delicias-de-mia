@@ -62,9 +62,7 @@ def inicio(request):
     return redirect(destinos.get(request.user.rol, "menu"))
 
 #mientras gabi hace el de ella
-@rol_requerido(Usuario.Rol.CLIENTE)
-def menu(request):
-    return render(request, "usuarios/pagina_rol.html", {"titulo": "Menú del cliente"})
+
 
 
 @rol_requerido(Usuario.Rol.COCINERO)
