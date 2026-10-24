@@ -1,0 +1,13 @@
+{% load static %}
+<div style="position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #171717;">
+
+  <!-- Capa 1: la imagen muy difuminada llenando la pantalla -->
+  <div style="position: absolute; inset: -5%; background: url({% static 'img/fondo.jpg' %}) center / cover no-repeat; filter: blur(40px); opacity: 0.6;"></div>
+
+  <!-- Capa 2: el logo en la mitad, con tamaño controlado -->
+  <img src="{% static 'img/fondo.jpg' %}" alt=""
+    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(90vw, 760px); max-height: 70vh; object-fit: contain; filter: blur(3px);" />
+
+  <!-- Capa oscura para que la tarjeta se lea -->
+  <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3);"></div>
+</div>

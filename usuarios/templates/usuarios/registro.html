@@ -1,23 +1,18 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro de cliente</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
+{% extends "usuarios/base.html" %}
 
-<body class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+{% block titulo %}Registro de cliente{% endblock %}
 
-  <main class="w-full max-w-md bg-white rounded-xl shadow-md p-8">
+{% block fondo %}{% include "usuarios/_fondo.html" %}{% endblock %}
+
+{% block contenido %}
+<div class="flex justify-center pt-6">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-md p-8">
     <h1 class="text-2xl font-bold text-slate-800 mb-1">Crear cuenta</h1>
     <p class="text-slate-500 mb-6">Regístrate para hacer tus pedidos.</p>
 
-    <!-- novalidate: así los mensajes los muestra Django, todos iguales y en español -->
     <form method="post" novalidate class="space-y-4">
       {% csrf_token %}
 
-      <!-- NOMBRE -->
       <div>
         <label for="nombre" class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
         <input id="nombre" name="nombre" type="text" placeholder="Ej: Laura Gómez"
@@ -28,7 +23,6 @@
         {% endfor %}
       </div>
 
-      <!-- CORREO -->
       <div>
         <label for="correo" class="block text-sm font-medium text-slate-700 mb-1">Correo</label>
         <input id="correo" name="correo" type="email" placeholder="laura@correo.com"
@@ -39,7 +33,6 @@
         {% endfor %}
       </div>
 
-      <!-- TELÉFONO -->
       <div>
         <label for="telefono" class="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
         <input id="telefono" name="telefono" type="tel" placeholder="3001234567"
@@ -50,7 +43,6 @@
         {% endfor %}
       </div>
 
-      <!-- CONTRASEÑA -->
       <div>
         <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Contraseña (máximo 8 caracteres)</label>
         <input id="password" name="password" type="password" maxlength="8"
@@ -60,7 +52,6 @@
         {% endfor %}
       </div>
 
-      <!-- CONFIRMAR CONTRASEÑA -->
       <div>
         <label for="confirmar" class="block text-sm font-medium text-slate-700 mb-1">Confirmar contraseña</label>
         <input id="confirmar" name="confirmar" type="password" maxlength="8"
@@ -69,8 +60,6 @@
           <p class="text-sm text-red-600 mt-1">{{ error }}</p>
         {% endfor %}
       </div>
-
-      <!-- NO HAY CAMPO DE ROL (criterio f) -->
 
       <button type="submit"
         class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg py-2.5 transition-colors">
@@ -82,7 +71,6 @@
         <a href="{% url 'login' %}" class="text-emerald-700 font-medium hover:underline">Inicia sesión</a>
       </p>
     </form>
-  </main>
-
-</body>
-</html>
+  </div>
+</div>
+{% endblock %}

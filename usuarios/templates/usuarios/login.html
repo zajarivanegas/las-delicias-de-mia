@@ -2,13 +2,14 @@
 
 {% block titulo %}Iniciar sesión{% endblock %}
 
+{% block fondo %}{% include "usuarios/_fondo.html" %}{% endblock %}
+
 {% block contenido %}
 <div class="flex justify-center pt-10">
   <div class="w-full max-w-md bg-white rounded-xl shadow-md p-8">
     <h1 class="text-2xl font-bold text-slate-800 mb-1">Iniciar sesión</h1>
     <p class="text-slate-500 mb-6">Entra a tu cuenta para continuar.</p>
 
-    <!-- Criterio 2: si las credenciales son incorrectas, se muestra este mensaje -->
     {% if form.non_field_errors %}
       <div class="mb-4 rounded-lg bg-red-100 text-red-700 text-sm p-3">
         {% for error in form.non_field_errors %}{{ error }}{% endfor %}
@@ -18,7 +19,6 @@
     <form method="post" novalidate class="space-y-4">
       {% csrf_token %}
 
-      <!-- CORREO -->
       <div>
         <label for="correo" class="block text-sm font-medium text-slate-700 mb-1">Correo</label>
         <input id="correo" name="correo" type="email" placeholder="laura@correo.com"
@@ -29,7 +29,6 @@
         {% endfor %}
       </div>
 
-      <!-- CONTRASEÑA -->
       <div>
         <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
         <input id="password" name="password" type="password"
