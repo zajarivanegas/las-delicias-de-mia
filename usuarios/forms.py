@@ -1,15 +1,10 @@
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.forms import UserCreationForm
 from .models import Usuario
 
 
 class RegistroClienteForm(forms.Form):
-    """Formulario de registro (HU-01).
-
-    OJO: aquí NO existe el campo "rol". Así el usuario nunca puede elegirlo (criterio f).
-    """
-
-    # Criterio a: nombre, correo, teléfono y contraseña (+ confirmación)
     nombre = forms.CharField(
         max_length=150,
         error_messages={"required": "Escribe tu nombre."},
@@ -27,7 +22,6 @@ class RegistroClienteForm(forms.Form):
             "invalid": "El teléfono debe tener solo números (de 7 a 10 dígitos).",
         },
     )
-    # Criterio c: contraseña de máximo 8 caracteres
     password = forms.CharField(
         max_length=8,
         widget=forms.PasswordInput,
@@ -45,7 +39,6 @@ class RegistroClienteForm(forms.Form):
         },
     )
 
-    # Criterio b: no permitir un correo que ya existe
     def clean_correo(self):
         correo = self.cleaned_data["correo"].strip().lower()
         if Usuario.objects.filter(email__iexact=correo).exists():
@@ -54,7 +47,6 @@ class RegistroClienteForm(forms.Form):
             )
         return correo
 
-    # Criterio c: las dos contraseñas deben ser iguales
     def clean(self):
         datos = super().clean()
         password = datos.get("password")
@@ -63,17 +55,17 @@ class RegistroClienteForm(forms.Form):
             self.add_error("confirmar", "Las contraseñas no son iguales.")
         return datos
 
-    # Guarda al cliente en la base de datos
     def guardar(self):
         datos = self.cleaned_data
         return Usuario.objects.create_user(
-            username=datos["correo"],      # usamos el correo como nombre de usuario
+            username=datos["correo"],
             email=datos["correo"],
-            password=datos["password"],    # create_user la encripta sola
+            password=datos["password"],
             first_name=datos["nombre"],
             telefono=datos["telefono"],
-            rol=Usuario.Rol.CLIENTE,       # el rol lo pone el programa, no el usuario
+            rol=Usuario.Rol.CLIENTE,
         )
+
 
 class LoginForm(forms.Form):
     correo = forms.EmailField(
@@ -99,8 +91,18 @@ class LoginForm(forms.Form):
                 usuario = authenticate(username=usuario_db.username, password=password)
 
             if usuario is None:
-                # Criterio 2: mensaje claro, sin decir cuál de los dos datos falló
                 raise forms.ValidationError("Correo o contraseña incorrectos.")
             self.usuario = usuario
 
         return datos
+
+
+class CrearCocineroForm(UserCreationForm):
+    class Meta:
+        model = Usuario
+        fields = ['username', 'email', 'telefono']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500'

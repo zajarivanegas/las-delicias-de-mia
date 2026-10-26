@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Personal - Las Delicias de Mía</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+
+    <header class="bg-red-700 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Panel de Personal</h1>
+            <span class="bg-red-600 text-sm py-1 px-3 rounded-full border border-red-500">Vista de Dueña</span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-700">Lista de Empleados y Usuarios</h2>
+            <a href="{% url 'crear_cocinero' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200">
+                + Crear Cocinero
+            </a>
+        </div>
+
+    
+        {% if messages %}
+            <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 mb-2 rounded-md shadow-sm {% if message.tags == 'error' %}bg-red-100 text-red-800 border-l-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-500{% else %}bg-green-100 text-green-800 border-l-4 border-green-500{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+
+        
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full w-full text-left border-collapse">
+                    <thead class="bg-gray-800 text-white text-sm uppercase tracking-wider">
+                        <tr>
+                            <th class="py-3 px-4">Usuario</th>
+                            <th class="py-3 px-4">Email</th>
+                            <th class="py-3 px-4">Teléfono</th>
+                            <th class="py-3 px-4">Rol</th>
+                            <th class="py-3 px-4 text-center">Estado</th>
+                            <th class="py-3 px-4 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700">
+                        {% for user in usuarios %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                            <td class="py-3 px-4 font-medium">{{ user.username }}</td>
+                            <td class="py-3 px-4">{{ user.email }}</td>
+                            <td class="py-3 px-4">{{ user.telefono|default:"-" }}</td>
+                            <td class="py-3 px-4">
+                                <form action="{% url 'cambiar_rol' user.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <select name="rol" onchange="this.form.submit()" class="border border-gray-300 rounded px-2 py-1 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500 {% if user == request.user %}bg-gray-100 cursor-not-allowed{% endif %}" {% if user == request.user %}disabled{% endif %}>
+                                        <option value="cliente" {% if user.rol == 'cliente' %}selected{% endif %}>Cliente</option>
+                                        <option value="cocinero" {% if user.rol == 'cocinero' %}selected{% endif %}>Cocinero</option>
+                                        <option value="duena" {% if user.rol == 'duena' %}selected{% endif %}>Dueña</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                {% if user.is_active %}
+                                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Activo</span>
+                                {% else %}
+                                    <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                {% if user != request.user and user.is_active %}
+                                    <a href="{% url 'desactivar_usuario' user.id %}" onclick="return confirm('¿Desactivar cuenta?');" class="text-red-600 hover:text-red-800 text-sm font-medium hover:underline">
+                                        Desactivar
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
