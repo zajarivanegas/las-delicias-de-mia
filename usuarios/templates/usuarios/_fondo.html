@@ -1,0 +1,44 @@
+{% load static %}
+<style>
+    .fondo-container {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        background: #171717;
+    }
+    
+    .fondo-capa-1 {
+        position: absolute;
+        inset: -5%;
+        background-image: url("{% static 'img/fondo.jpg' %}");
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        filter: blur(40px);
+        opacity: 0.6;
+    }
+
+    .fondo-capa-2 {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(90vw, 760px);
+        max-height: 70vh;
+        object-fit: contain;
+        filter: blur(3px);
+    }
+
+    .fondo-capa-oscura {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+    }
+</style>
+
+<div class="fondo-container">
+    <div class="fondo-capa-1"></div>
+    <img src="{% static 'img/fondo.jpg' %}" alt="" class="fondo-capa-2" />
+    <div class="fondo-capa-oscura"></div>
+</div>

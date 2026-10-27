@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración de Menú</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-6xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Gestión de Menú</h1>
+            <div class="space-x-2">
+                <a href="{% url 'crear_categoria' %}" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">+ Categoría</a>
+                <a href="{% url 'crear_producto' %}" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">+ Producto</a>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-3 mb-4 rounded text-white {% if message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-green-500{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="p-3">Producto</th>
+                        <th class="p-3">Categoría</th>
+                        <th class="p-3">Precio</th>
+                        <th class="p-3">Estado</th>
+                        <th class="p-3 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in productos %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 font-semibold">{{ prod.nombre }}</td>
+                        <td class="p-3">{{ prod.categoria.nombre }}</td>
+                        <td class="p-3">${{ prod.precio }}</td>
+                        <td class="p-3">
+                            {% if not prod.is_active %}
+                                <span class="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs">Desactivado</span>
+                            {% elif prod.is_agotado %}
+                                <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-bold">Agotado</span>
+                            {% else %}
+                                <span class="bg-green-100 text-green-600 px-2 py-1 rounded text-xs">Disponible</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3 text-center space-x-2">
+                            <a href="{% url 'editar_producto' prod.id %}" class="text-blue-600 hover:underline text-sm">Editar</a>
+                            {% if prod.is_active %}
+                                <a href="{% url 'toggle_agotado' prod.id %}" class="text-yellow-600 hover:underline text-sm">
+                                    {% if prod.is_agotado %}Disponible{% else %}Agotar{% endif %}
+                                </a>
+                                <a href="{% url 'desactivar_producto' prod.id %}" class="text-red-600 hover:underline text-sm" onclick="return confirm('¿Ocultar del menú?')">Desactivar</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <h2 class="text-xl font-bold mt-8 mb-4">Categorías</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for cat in categorias %}
+                <div class="bg-white border rounded p-2 flex items-center shadow-sm">
+                    <span class="{% if not cat.is_active %}line-through text-gray-400{% endif %}">{{ cat.nombre }}</span>
+                    {% if cat.is_active %}
+                        <a href="{% url 'desactivar_categoria' cat.id %}" class="text-red-500 ml-2 text-xs font-bold">✖</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
