@@ -1,0 +1,92 @@
+{% extends "usuarios/base.html" %}
+{% load formatos %}
+
+{% block titulo %}Menú{% endblock %}
+
+{% block contenido %}
+<h1 class="text-2xl font-bold text-slate-800 mb-4">Nuestro menú</h1>
+
+<!-- HU-03: CATEGORÍAS con su imagen -->
+<nav class="flex gap-3 overflow-x-auto pb-3 mb-6">
+
+  <!-- Criterio 3: opción para volver a ver todos los productos -->
+  <a href="{% url 'menu' %}"
+    class="shrink-0 w-24 flex flex-col items-center gap-2 rounded-xl p-2 text-sm font-medium
+           {% if not categoria_actual %}bg-emerald-600 text-white{% else %}bg-white text-slate-700 hover:bg-slate-50{% endif %}">
+    <span class="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 text-xs">Todos</span>
+    <span>Todos</span>
+  </a>
+
+  <!-- Criterio 1: se listan las categorías activas -->
+  {% for categoria in categorias %}
+    <a href="{% url 'menu' %}?categoria={{ categoria.id }}"
+      class="shrink-0 w-24 flex flex-col items-center gap-2 rounded-xl p-2 text-sm font-medium text-center
+             {% if categoria_actual.id == categoria.id %}bg-emerald-600 text-white{% else %}bg-white text-slate-700 hover:bg-slate-50{% endif %}">
+      {% if categoria.imagen %}
+        <img src="{{ categoria.imagen.url }}" alt="{{ categoria.nombre }}"
+          class="h-16 w-16 rounded-full object-cover" />
+      {% else %}
+        <span class="h-16 w-16 rounded-full bg-slate-200"></span>
+      {% endif %}
+      <span>{{ categoria.nombre }}</span>
+    </a>
+  {% endfor %}
+</nav>
+
+<!-- HU-04: PRODUCTOS -->
+{% if productos %}
+  <!-- Criterio 5: 1 columna en celular, 2 en tablet, 3 en pantalla grande -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for producto in productos %}
+      <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
+
+        <div class="relative">
+          {% if producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}"
+              class="h-44 w-full object-cover {% if not producto.disponible %}opacity-50{% endif %}" />
+          {% else %}
+            <div class="h-44 w-full bg-slate-200 flex items-center justify-center text-slate-400 text-sm">
+              Sin imagen
+            </div>
+          {% endif %}
+
+          <!-- Criterio 3: producto agotado -->
+          {% if not producto.disponible %}
+            <span class="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-1">
+              Agotado
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="p-4 flex flex-col flex-1">
+          <h2 class="font-semibold text-slate-800">{{ producto.nombre }}</h2>
+          <p class="text-sm text-slate-500 mt-1 flex-1">{{ producto.descripcion }}</p>
+
+          <div class="flex items-center justify-between mt-4">
+            <!-- Criterio 2: precio en pesos con formato legible -->
+            <span class="font-bold text-emerald-700">{{ producto.precio|pesos }}</span>
+
+            {% if producto.disponible %}
+              <!-- Este botón se conecta al carrito en la HU-07 -->
+              <button type="button"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg px-3 py-1.5 transition-colors">
+                Agregar
+              </button>
+            {% else %}
+              <button type="button" disabled
+                class="bg-slate-200 text-slate-400 text-sm font-medium rounded-lg px-3 py-1.5 cursor-not-allowed">
+                Agotado
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-white rounded-xl shadow-sm p-8 text-center text-slate-500">
+    No hay productos en esta categoría.
+    <a href="{% url 'menu' %}" class="text-emerald-700 font-medium hover:underline">Ver todos</a>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "usuarios/base.html" %}
+
+{% block titulo %}Acceso denegado{% endblock %}
+
+{% block contenido %}
+<!-- Criterio 6: mensaje cuando alguien entra a una página sin permiso -->
+<div class="flex justify-center pt-10">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-md p-8 text-center">
+    <h1 class="text-2xl font-bold text-red-600 mb-2">Acceso denegado</h1>
+    <p class="text-slate-600 msb-6">No tienes permiso para entrar a esta página.</p>
+    <a href="{% url 'inicio' %}"
+      class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg px-4 py-2 transition-colors">
+      Volver a mi página
+    </a>
+  </div>
+</div>
+{% endblock %}
