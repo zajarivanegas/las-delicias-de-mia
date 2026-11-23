@@ -11,15 +11,13 @@ def lista_menu(request):
 
     if categoria_id:
         categoria_actual = get_object_or_404(Categoria, id=categoria_id, activa=True)
-        productos = Producto.objects.filter(categoria=categoria_actual, disponible=True)
+        productos = Producto.objects.filter(categoria=categoria_actual)
     else:
         # Si no eligió ninguna, mostramos todos los productos de categorías activas
-        productos = Producto.objects.filter(categoria__activa=True, disponible=True)
+        productos = Producto.objects.filter(categoria__activa=True)
 
     return render(request, 'productos/menu.html', {
         'categorias': categorias,
         'productos': productos,
         'categoria_actual': categoria_actual,
     })
-
-# Create your views here.
