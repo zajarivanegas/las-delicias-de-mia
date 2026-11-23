@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venta Manual de Domicilio | Las Delicias de Mia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-amber-50/50 text-stone-800 p-4 sm:p-8 font-sans">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <!-- Encabezado -->
+        <div class="bg-white rounded-2xl border border-amber-200/80 p-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-stone-900">Registrar venta manual de domicilio</h1>
+                    <p class="text-sm text-stone-500">Registra los pedidos tomados por WhatsApp para que sumen en los reportes de ventas.</p>
+                </div>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide bg-indigo-100 text-indigo-800 border border-indigo-200 self-start sm:self-center">
+                    Tipo: Domicilio
+                </span>
+            </div>
+
+            {% if messages %}
+                <div class="mb-5 space-y-2">
+                    {% for message in messages %}
+                        <div class="text-sm font-medium px-4 py-3 rounded-xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" id="form-venta-manual" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Lista dinámica de productos -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-bold text-stone-700">Productos y cantidades</label>
+                        <button type="button" id="btn-agregar-fila" class="text-sm font-semibold text-amber-700 hover:text-amber-900 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition">
+                            + Agregar producto
+                        </button>
+                    </div>
+
+                    <div id="contenedor-filas" class="space-y-3">
+                        <div class="fila-producto grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-stone-50 p-3 rounded-xl border border-stone-200">
+                            <div class="sm:col-span-6">
+                                <select name="producto_id[]" required class="select-producto w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                    <option value="" data-precio="0">-- Selecciona un producto --</option>
+                                    {% for producto in productos %}
+                                        <option value="{{ producto.id }}" data-precio="{{ producto.precio|stringformat:'.2f' }}">
+                                            {{ producto.nombre }} — ${{ producto.precio }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <input type="number" name="cantidad[]" min="1" value="1" required class="input-cantidad w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            </div>
+                            <div class="sm:col-span-3 text-right">
+                                <span class="text-xs text-stone-500 block">Subtotal</span>
+                                <span class="subtotal-fila font-bold text-stone-900">$0.00</span>
+                            </div>
+                            <div class="sm:col-span-1 text-right">
+                                <button type="button" class="btn-eliminar-fila text-rose-600 hover:text-rose-800 text-sm font-bold px-2 py-1 rounded hidden" title="Quitar fila">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Método de pago y Total automático -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-stone-200 items-end">
+                    <div>
+                        <label for="metodo_pago" class="block text-sm font-bold text-stone-700 mb-2">Método de pago</label>
+                        <select name="metodo_pago" id="metodo_pago" required class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">-- Selecciona método de pago --</option>
+                            {% for valor, etiqueta in metodos_pago %}
+                                <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+                        <span class="text-sm font-bold text-stone-700 uppercase">Total calculado</span>
+                        <span id="total-general" class="text-2xl font-extrabold text-amber-800">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-3 rounded-xl shadow-sm transition">
+                        Registrar venta de domicilio
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Historial reciente de ventas de domicilio -->
+        <div class="bg-white rounded-2xl border border-amber-200/80 p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-stone-900 mb-4">Últimas ventas de domicilio registradas</h2>
+
+            {% if ultimas_ventas %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs uppercase text-stone-500 bg-stone-50 border-b border-stone-200">
+                            <tr>
+                                <th class="py-2.5 px-3">Venta</th>
+                                <th class="py-2.5 px-3">Tipo</th>
+                                <th class="py-2.5 px-3">Productos</th>
+                                <th class="py-2.5 px-3">Pago</th>
+                                <th class="py-2.5 px-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100">
+                            {% for venta in ultimas_ventas %}
+                                <tr>
+                                    <td class="py-3 px-3 font-semibold text-stone-800">#{{ venta.id }}</td>
+                                    <td class="py-3 px-3">
+                                        <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-indigo-100 text-indigo-800">
+                                            {{ venta.get_tipo_pedido_display }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-3 text-stone-600">
+                                        {% for d in venta.detalles.all %}
+                                            <div>{{ d.cantidad }}x {{ d.producto.nombre }}</div>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="py-3 px-3 text-stone-700">{{ venta.get_metodo_pago_display }}</td>
+                                    <td class="py-3 px-3 text-right font-bold text-stone-900">${{ venta.total }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-sm text-stone-500">Aún no hay ventas manuales de domicilio registradas.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        const contenedorFilas = document.getElementById("contenedor-filas");
+        const btnAgregarFila = document.getElementById("btn-agregar-fila");
+        const totalGeneralEl = document.getElementById("total-general");
+
+        function actualizarTotales() {
+            const filas = contenedorFilas.querySelectorAll(".fila-producto");
+            let total = 0;
+
+            filas.forEach(fila => {
+                const select = fila.querySelector(".select-producto");
+                const inputCant = fila.querySelector(".input-cantidad");
+                const subtotalEl = fila.querySelector(".subtotal-fila");
+                const btnEliminar = fila.querySelector(".btn-eliminar-fila");
+
+                const opcion = select.options[select.selectedIndex];
+                const precioRaw = opcion ? (opcion.dataset.precio || "0") : "0";
+                const precio = parseFloat(precioRaw.replace(",", ".")) || 0;
+                const cantidad = Math.max(0, parseInt(inputCant.value, 10) || 0);
+
+                const subtotal = precio * cantidad;
+                total += subtotal;
+
+                subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+                btnEliminar.classList.toggle("hidden", filas.length === 1);
+            });
+
+            totalGeneralEl.textContent = `$${total.toFixed(2)}`;
+        }
+
+        function enlazarEventosFila(fila) {
+            fila.querySelector(".select-producto").addEventListener("change", actualizarTotales);
+            fila.querySelector(".input-cantidad").addEventListener("input", actualizarTotales);
+            fila.querySelector(".btn-eliminar-fila").addEventListener("click", () => {
+                fila.remove();
+                actualizarTotales();
+            });
+        }
+
+        btnAgregarFila.addEventListener("click", () => {
+            const primeraFila = contenedorFilas.querySelector(".fila-producto");
+            const nuevaFila = primeraFila.cloneNode(true);
+            nuevaFila.querySelector(".select-producto").selectedIndex = 0;
+            nuevaFila.querySelector(".input-cantidad").value = 1;
+            nuevaFila.querySelector(".subtotal-fila").textContent = "$0.00";
+
+            enlazarEventosFila(nuevaFila);
+            contenedorFilas.appendChild(nuevaFila);
+            actualizarTotales();
+        });
+
+        enlazarEventosFila(contenedorFilas.querySelector(".fila-producto"));
+        actualizarTotales();
+    </script>
+</body>
+</html>

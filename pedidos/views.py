@@ -216,3 +216,98 @@ def api_pedidos_cocina(request):
         })
 
     return JsonResponse({"pedidos": datos})
+
+@login_required(login_url="login")
+@requerir_rol(["duena"])
+def venta_manual_domicilio(request):
+    from django.db import transaction
+
+    productos = Producto.objects.filter(disponible=True).order_by("nombre")
+
+    if request.method == "POST":
+        metodo_pago = request.POST.get("metodo_pago", "").strip()
+        metodos_validos = dict(Pedido.METODOS_PAGO)
+
+        if metodo_pago not in metodos_validos:
+            messages.error(request, "Debes seleccionar un método de pago válido.")
+            return redirect("venta_manual_domicilio")
+
+        producto_ids = request.POST.getlist("producto_id[]")
+        cantidades_raw = request.POST.getlist("cantidad[]")
+
+        cantidades_por_producto = {}
+        for prod_id, cant_str in zip(producto_ids, cantidades_raw):
+            prod_id = prod_id.strip()
+            cant_str = cant_str.strip()
+            if not prod_id:
+                continue
+            try:
+                cantidad = int(cant_str)
+            except ValueError:
+                messages.error(request, "Las cantidades deben ser números enteros positivos.")
+                return redirect("venta_manual_domicilio")
+
+            if cantidad <= 0:
+                messages.error(request, "Cada producto debe tener una cantidad mayor a 0.")
+                return redirect("venta_manual_domicilio")
+
+            cantidades_por_producto[prod_id] = cantidades_por_producto.get(prod_id, 0) + cantidad
+
+        if not cantidades_por_producto:
+            messages.error(request, "Debes agregar al menos un producto a la venta.")
+            return redirect("venta_manual_domicilio")
+
+        items_venta = []
+        total = Decimal("0.00")
+
+        for prod_id, cantidad in cantidades_por_producto.items():
+            producto = Producto.objects.filter(id=prod_id, disponible=True).first()
+            if not producto:
+                messages.error(request, "Uno de los productos seleccionados no está disponible.")
+                return redirect("venta_manual_domicilio")
+
+            subtotal = producto.precio * cantidad
+            total += subtotal
+            items_venta.append({
+                "producto": producto,
+                "precio_unitario": producto.precio,
+                "cantidad": cantidad,
+                "subtotal": subtotal,
+            })
+
+        with transaction.atomic():
+            pedido = Pedido.objects.create(
+                cliente=request.user,
+                tipo_pedido="domicilio",
+                mesa=None,
+                estado="entregado",
+                metodo_pago=metodo_pago,
+                total=total,
+            )
+
+            for item in items_venta:
+                DetallePedido.objects.create(
+                    pedido=pedido,
+                    producto=item["producto"],
+                    precio_unitario=item["precio_unitario"],
+                    cantidad=item["cantidad"],
+                    subtotal=item["subtotal"],
+                )
+
+        messages.success(
+            request,
+            f"Venta manual de domicilio #{pedido.id} registrada correctamente por ${pedido.total}.",
+        )
+        return redirect("venta_manual_domicilio")
+
+    ultimas_ventas = (
+        Pedido.objects.filter(tipo_pedido="domicilio", estado="entregado")
+        .prefetch_related("detalles__producto")
+        .order_by("-creado_en")[:10]
+    )
+
+    return render(request, "pedidos/venta_manual_domicilio.html", {
+        "productos": productos,
+        "metodos_pago": Pedido.METODOS_PAGO,
+        "ultimas_ventas": ultimas_ventas,
+    })
