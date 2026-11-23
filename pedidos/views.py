@@ -5,6 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from productos.models import Producto
 from .models import ConfiguracionNegocio, DetallePedido, Mesa, Pedido
+from django.http import JsonResponse
+from django.utils import timezone
+from usuarios.views import requerir_rol
 
 
 def _obtener_resumen_carrito(request):
@@ -180,3 +183,35 @@ def confirmar_pedido(request):
         f"Resumen: {resumen_texto}. Total: ${pedido.total}."
     )
     return redirect("menu_productos")
+
+@login_required(login_url="login")
+@requerir_rol(["cocinero", "duena"])
+def api_pedidos_cocina(request):
+    # Solo pedidos activos (excluye los entregados), del más antiguo al más reciente
+    pedidos = (
+        Pedido.objects.exclude(estado="entregado")
+        .select_related("mesa", "cliente")
+        .prefetch_related("detalles__producto")
+        .order_by("creado_en")
+    )
+
+    datos = []
+    for pedido in pedidos:
+        hora_local = timezone.localtime(pedido.creado_en).strftime("%I:%M %p")
+        datos.append({
+            "id": pedido.id,
+            "tipo_pedido": pedido.get_tipo_pedido_display(),
+            "mesa": pedido.mesa.numero if pedido.mesa else None,
+            "estado": pedido.estado,
+            "estado_display": pedido.get_estado_display(),
+            "hora": hora_local,
+            "detalles": [
+                {
+                    "cantidad": d.cantidad,
+                    "producto": d.producto.nombre,
+                }
+                for d in pedido.detalles.all()
+            ],
+        })
+
+    return JsonResponse({"pedidos": datos})

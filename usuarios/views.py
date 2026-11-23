@@ -109,11 +109,10 @@ def cerrar_sesion(request):
 def vista_menu(request):
     return render(request, "menu.html")
 
-
 @login_required(login_url="login")
 @requerir_rol(["cocinero", "duena"])
 def vista_cocina(request):
-    return render(request, "cocina.html")
+    return render(request, "pedidos/cocina.html")
 
 
 @login_required(login_url="login")
