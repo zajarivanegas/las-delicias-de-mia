@@ -204,6 +204,7 @@ def api_pedidos_cocina(request):
             "mesa": pedido.mesa.numero if pedido.mesa else None,
             "estado": pedido.estado,
             "estado_display": pedido.get_estado_display(),
+            "metodo_pago": pedido.get_metodo_pago_display(),
             "hora": hora_local,
             "detalles": [
                 {

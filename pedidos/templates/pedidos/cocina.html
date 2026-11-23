@@ -6,27 +6,27 @@
     <title>Cocina - Pedidos Activos</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 font-sans p-6">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
-            <h1 class="text-3xl font-bold text-gray-800">Pedidos en Cocina</h1>
-            <span id="estado-conexion" class="text-sm text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm">
+<body class="bg-slate-100 font-sans p-4 sm:p-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900">Pedidos en Cocina</h1>
+            <span id="estado-conexion" class="text-sm sm:text-base font-medium text-slate-600 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200">
                 Actualización automática cada 5s
             </span>
         </div>
 
         {% if messages %}
             {% for message in messages %}
-                <div class="p-3 mb-4 rounded text-white {% if message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-green-500{% endif %}">
+                <div class="p-4 mb-4 rounded-xl text-white font-semibold {% if message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-green-500{% endif %}">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
 
         <!-- Contenedor donde JavaScript pinta los pedidos automáticamente -->
-        <div id="cola-pedidos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="col-span-full text-center py-10 bg-white rounded-lg shadow">
-                <p class="text-gray-500 text-lg">Cargando pedidos...</p>
+        <div id="cola-pedidos" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div class="col-span-full text-center py-12 bg-white rounded-2xl shadow">
+                <p class="text-slate-500 text-xl font-medium">Cargando pedidos...</p>
             </div>
         </div>
     </div>
@@ -39,26 +39,26 @@
             if (estado === "pendiente") {
                 return {
                     borde: "border-red-500",
-                    badge: "bg-red-100 text-red-700"
+                    badge: "bg-red-100 text-red-800 border border-red-200"
                 };
             }
             if (estado === "en_preparacion") {
                 return {
-                    borde: "border-yellow-500",
-                    badge: "bg-yellow-100 text-yellow-700"
+                    borde: "border-amber-500",
+                    badge: "bg-amber-100 text-amber-800 border border-amber-200"
                 };
             }
             return {
-                borde: "border-gray-400",
-                badge: "bg-gray-100 text-gray-700"
+                borde: "border-slate-400",
+                badge: "bg-slate-100 text-slate-800 border border-slate-200"
             };
         }
 
         function renderizarPedidos(pedidos) {
             if (!pedidos || pedidos.length === 0) {
                 contenedor.innerHTML = `
-                    <div class="col-span-full text-center py-10 bg-white rounded-lg shadow">
-                        <p class="text-gray-500 text-lg">No hay pedidos activos en este momento.</p>
+                    <div class="col-span-full text-center py-12 bg-white rounded-2xl shadow">
+                        <p class="text-slate-500 text-xl font-medium">No hay pedidos activos en este momento.</p>
                     </div>
                 `;
                 return;
@@ -66,31 +66,58 @@
 
             contenedor.innerHTML = pedidos.map(pedido => {
                 const estilos = obtenerEstilosEstado(pedido.estado);
-                const destino = pedido.mesa ? `Mesa #${pedido.mesa}` : pedido.tipo_pedido;
+
+                // Destacar Mesa vs Domicilio (Sin mesa)
+                const bloqueDestino = pedido.mesa
+                    ? `
+                        <div class="bg-amber-500 text-white rounded-xl px-4 py-3 mb-4 flex items-center justify-between shadow-sm">
+                            <span class="text-2xl sm:text-3xl font-black tracking-wide">MESA #${pedido.mesa}</span>
+                            <span class="text-xs sm:text-sm font-bold uppercase bg-amber-700/60 px-2.5 py-1 rounded-lg">En local</span>
+                        </div>
+                    `
+                    : `
+                        <div class="bg-indigo-600 text-white rounded-xl px-4 py-3 mb-4 flex items-center justify-between shadow-sm">
+                            <span class="text-2xl sm:text-3xl font-black tracking-wide">DOMICILIO</span>
+                            <span class="text-xs sm:text-sm font-bold uppercase bg-indigo-800/70 px-2.5 py-1 rounded-lg">Sin mesa</span>
+                        </div>
+                    `;
+
                 const listaProductos = pedido.detalles.map(d => `
-                    <li class="flex justify-between text-sm text-gray-700 py-1 border-b border-gray-100 last:border-b-0">
-                        <span>${d.producto}</span>
-                        <span class="font-semibold">x${d.cantidad}</span>
+                    <li class="flex justify-between items-center text-base sm:text-lg text-slate-800 py-2 border-b border-slate-200 last:border-b-0">
+                        <span class="font-medium">${d.producto}</span>
+                        <span class="font-extrabold text-slate-900 bg-slate-200 px-3 py-0.5 rounded-lg">x${d.cantidad}</span>
                     </li>
                 `).join("");
 
                 return `
-                    <div class="bg-white rounded-lg shadow-md p-4 border-l-4 ${estilos.borde}">
-                        <div class="flex justify-between items-center mb-2">
-                            <h2 class="text-xl font-bold text-gray-800">Pedido #${pedido.id}</h2>
-                            <span class="px-2 py-1 text-xs font-bold rounded-full ${estilos.badge}">
-                                ${pedido.estado_display}
+                    <div class="bg-white rounded-2xl shadow-md p-5 border-t-8 ${estilos.borde} flex flex-col justify-between">
+                        <div>
+                            <!-- Encabezado: Número de pedido y Estado -->
+                            <div class="flex justify-between items-center mb-3">
+                                <h2 class="text-lg font-bold text-slate-600">Pedido #${pedido.id}</h2>
+                                <span class="px-3 py-1 text-sm font-bold rounded-full ${estilos.badge}">
+                                    ${pedido.estado_display}
+                                </span>
+                            </div>
+
+                            <!-- Destino destacado: Mesa #X o Domicilio (Sin mesa) -->
+                            ${bloqueDestino}
+
+                            <!-- Lista de productos y cantidades -->
+                            <ul class="bg-slate-50 rounded-xl p-3 mb-4 border border-slate-200/80">
+                                ${listaProductos || '<li class="text-base text-slate-400">Sin productos</li>'}
+                            </ul>
+                        </div>
+
+                        <!-- Pie de tarjeta: Método de pago y Hora -->
+                        <div class="flex flex-wrap justify-between items-center gap-2 pt-3 border-t border-slate-200 text-sm sm:text-base">
+                            <span class="font-bold text-slate-800 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-lg">
+                                Pago: ${pedido.metodo_pago}
+                            </span>
+                            <span class="font-semibold text-slate-500">
+                                Llegó: ${pedido.hora}
                             </span>
                         </div>
-
-                        <div class="flex justify-between text-sm text-gray-500 mb-3">
-                            <span><strong>${destino}</strong></span>
-                            <span>Llegó: ${pedido.hora}</span>
-                        </div>
-
-                        <ul class="bg-gray-50 rounded p-2">
-                            ${listaProductos || '<li class="text-sm text-gray-400">Sin productos</li>'}
-                        </ul>
                     </div>
                 `;
             }).join("");
