@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cocina - Pedidos Activos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-6">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">🍳 Pedidos en Cocina</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-3 mb-4 rounded text-white {% if message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-green-500{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for pedido in pedidos %}
+            <div class="bg-white rounded-lg shadow-md p-4 border-l-4 
+                {% if pedido.estado == 'pendiente' %}border-red-500
+                {% elif pedido.estado == 'preparacion' %}border-yellow-500
+                {% elif pedido.estado == 'listo' %}border-green-500{% endif %}">
+                
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-bold">Pedido #{{ pedido.id }}</h2>
+                    <span class="px-2 py-1 text-xs font-bold rounded-full 
+                        {% if pedido.estado == 'pendiente' %}bg-red-100 text-red-700
+                        {% elif pedido.estado == 'preparacion' %}bg-yellow-100 text-yellow-700
+                        {% elif pedido.estado == 'listo' %}bg-green-100 text-green-700{% endif %}">
+                        {{ pedido.get_estado_display }}
+                    </span>
+                </div>
+                
+                <p class="text-sm text-gray-500 mb-4">Creado: {{ pedido.fecha_creacion|date:"H:i" }}</p>
+
+                <form action="{% url 'avanzar_estado' pedido.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                        Avanzar a Siguiente Estado &rarr;
+                    </button>
+                </form>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-10 bg-white rounded-lg shadow">
+                <p class="text-gray-500 text-lg">No hay pedidos activos en este momento. ¡Buen trabajo!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
