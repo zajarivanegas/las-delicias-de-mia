@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Ventas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-6">
+    <div class="max-w-4xl mx-auto">
+        
+        <div class="mb-4">
+            <a href="#" class="inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition shadow-sm text-sm">
+                ← Volver al Menú Principal
+            </a>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">💰 Historial de Ventas</h1>
+            <a href="{% url 'reporte_ventas' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition">
+                Ver Reporte por Fechas
+            </a>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="p-3">Venta</th>
+                        <th class="p-3">Fecha y Hora</th>
+                        <th class="p-3">Pedido</th>
+                        <th class="p-3">Total</th>
+                        <th class="p-3 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 font-semibold">#{{ venta.id }}</td>
+                        <td class="p-3">{{ venta.fecha_hora|date:"d/m/Y H:i" }}</td>
+                        <td class="p-3">#{{ venta.pedido.id }}</td>
+                        <td class="p-3 font-bold text-green-600">${{ venta.total }}</td>
+                        <td class="p-3 text-center">
+                            <a href="{% url 'detalle_venta' venta.id %}" class="text-blue-600 hover:underline">Ver Recibo</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="p-6 text-center text-gray-500">Aún no hay ventas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

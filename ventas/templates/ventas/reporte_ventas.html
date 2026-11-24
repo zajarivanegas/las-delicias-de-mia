@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Ventas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-6">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="mb-4">
+            <a href="#" class="inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition shadow-sm text-sm">
+                ← Volver al Menú Principal
+            </a>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Reporte de Ventas por Fechas</h1>
+            <a href="{% url 'lista_ventas' %}" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 transition">Volver a Ventas</a>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+            <form method="GET" class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Fecha Inicio</label>
+                    <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Fecha Fin</label>
+                    <input type="date" name="fecha_fin" value="{{ fecha_fin }}" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 transition">Filtrar</button>
+                <a href="{% url 'reporte_ventas' %}" class="text-blue-500 underline mb-2">Limpiar</a>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-green-500 text-white p-6 rounded-lg shadow-md">
+                <p class="text-sm font-bold mb-1">Total Vendido</p>
+                <p class="text-4xl font-extrabold">${{ total_vendido }}</p>
+            </div>
+            <div class="bg-blue-500 text-white p-6 rounded-lg shadow-md">
+                <p class="text-sm font-bold mb-1">Cantidad de Ventas</p>
+                <p class="text-4xl font-extrabold">{{ cantidad_ventas }}</p>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Desglose por Método de Pago</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+                <p class="text-gray-500 font-bold">Efectivo</p>
+                <p class="text-2xl font-bold">${{ pagos.efectivo }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+                <p class="text-gray-500 font-bold">Tarjeta</p>
+                <p class="text-2xl font-bold">${{ pagos.tarjeta }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500">
+                <p class="text-gray-500 font-bold">Transferencia</p>
+                <p class="text-2xl font-bold">${{ pagos.transferencia }}</p>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Listado de Ventas</h2>
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="p-3">ID Venta</th>
+                        <th class="p-3">Fecha y Hora</th>
+                        <th class="p-3">Método</th>
+                        <th class="p-3">Tipo</th>
+                        <th class="p-3">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">#{{ venta.id }}</td>
+                        <td class="p-3">{{ venta.fecha_hora|date:"d/m/Y H:i" }}</td>
+                        <td class="p-3">{{ venta.get_metodo_pago_display }}</td>
+                        <td class="p-3">{{ venta.get_tipo_display }}</td>
+                        <td class="p-3 text-green-600 font-bold">${{ venta.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-6 text-center text-gray-500">No hay ventas en estas fechas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

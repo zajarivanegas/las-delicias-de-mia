@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from productos.models import Producto
 
 class Pedido(models.Model):
     ESTADOS = [
@@ -26,3 +27,11 @@ class HistorialEstado(models.Model):
 
     def __str__(self):
         return f"{self.pedido.id} - {self.estado}"
+
+class DetallePedido(models.Model):
+    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalles')
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.cantidad}x {self.producto.nombre}"

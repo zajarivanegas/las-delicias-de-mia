@@ -47,3 +47,6 @@ def desactivar_usuario(request, usuario_id):
     else:
         messages.error(request, "No puedes desactivar tu propia cuenta.")
     return redirect('gestion_personal')
+
+
+

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recibo de Venta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-6 flex flex-col justify-center items-center min-h-screen">
+
+    <div class="w-full max-w-sm mb-4">
+        <a href="#" class="inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition shadow-sm text-sm">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Las Delicias de Mía</h2>
+            <p class="text-sm text-gray-500">Recibo de Venta #{{ venta.id }}</p>
+            <p class="text-xs text-gray-400">{{ venta.fecha_hora|date:"d/m/Y H:i:s" }}</p>
+        </div>
+        <div class="border-t border-b border-dashed border-gray-300 py-3 mb-4 text-sm">
+            <p><strong>Pedido:</strong> #{{ venta.pedido.id }}</p>
+            <p><strong>Tipo:</strong> {{ venta.get_tipo_display }}</p>
+            <p><strong>Pago:</strong> {{ venta.get_metodo_pago_display }}</p>
+        </div>
+        <table class="w-full text-sm mb-4">
+            <thead>
+                <tr class="border-b border-gray-200">
+                    <th class="text-left pb-2">Cant.</th>
+                    <th class="text-left pb-2">Producto</th>
+                    <th class="text-right pb-2">Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in venta.detalles.all %}
+                <tr>
+                    <td class="py-1">{{ detalle.cantidad }}x</td>
+                    <td class="py-1">{{ detalle.producto.nombre }}</td>
+                    <td class="py-1 text-right">${{ detalle.precio_unitario }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-right border-t border-gray-300 pt-3 mb-6">
+            <p class="text-xl font-bold text-green-600">Total: ${{ venta.total }}</p>
+        </div>
+        <div class="text-center">
+            <a href="{% url 'lista_ventas' %}" class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold py-2 px-4 rounded transition">
+                Volver a Ventas
+            </a>
+        </div>
+    </div>
+</body>
+</html>

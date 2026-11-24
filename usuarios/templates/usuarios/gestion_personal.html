@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Personal - Las Delicias de Mía</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
 
-    
     <header class="bg-red-700 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-2xl font-bold">Panel de Personal</h1>
@@ -19,6 +17,12 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8">
         
+        <div class="mb-4">
+            <a href="#" class="inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition shadow-sm text-sm">
+                ← Volver al Menú Principal
+            </a>
+        </div>
+
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-gray-700">Lista de Empleados y Usuarios</h2>
             <a href="{% url 'crear_cocinero' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200">
@@ -26,7 +30,6 @@
             </a>
         </div>
 
-        
         {% if messages %}
             <div class="mb-4">
             {% for message in messages %}
@@ -37,7 +40,6 @@
             </div>
         {% endif %}
 
-        
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full w-full text-left border-collapse">
